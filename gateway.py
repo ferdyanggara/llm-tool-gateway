@@ -75,10 +75,14 @@ _accounts: dict[str, list[dict[str, Any]]] = {
 }
 
 # metrics: simple per-tool counters
+# 'calls'         = execute_tool reached the allow-list check
+# 'denied'        = gateway rejected the call
+# 'errors'        = missing param or backend exception
+# 'backend_calls' = backend stub was actually invoked (all checks passed)
 metrics: dict[str, dict[str, int]] = {
-    "get_account_summary": {"calls": 0, "denied": 0, "errors": 0},
-    "create_support_ticket": {"calls": 0, "denied": 0, "errors": 0},
-    "initiate_transfer":    {"calls": 0, "denied": 0, "errors": 0},
+    "get_account_summary":  {"calls": 0, "denied": 0, "errors": 0, "backend_calls": 0},
+    "create_support_ticket":{"calls": 0, "denied": 0, "errors": 0, "backend_calls": 0},
+    "initiate_transfer":    {"calls": 0, "denied": 0, "errors": 0, "backend_calls": 0},
 }
 
 
@@ -303,6 +307,7 @@ class ToolGateway:
             "OK  session=%r  tool=%r  customer=%r",
             session_id, tool_name, authenticated_customer,
         )
+        self._inc(tool_name, "backend_calls")
         return GatewayResult(Status.OK, data=data)
 
     # ------------------------------------------------------------------
